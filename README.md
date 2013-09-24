@@ -4,6 +4,12 @@ subconsolnic
 A script to use subsonic in console
 Version : 1.0
 
+The scn.sh is in French
+If you want it in english, download scn_en.sh
+
+
+--------------------------------------------------------
+
 Script forké et inspiré par SubsonicPlayerCLI by ts123
 
 Ce script permet de controler un serveur subsonic directement depuis votre console
@@ -37,10 +43,11 @@ Les paramètres actuels sont :
  This script allows you to search and play       
  your favorite music on a subsonic server
  
+ 
  To use it you need :
- * wget
- * mplayer
- * xmlstarlet
+ * Wget
+ * Mplayer
+ * Xmlstarlet
  The script will check if the 3 programs are present and will install them.
                                             
  Don't forget to change the parameters    

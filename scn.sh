@@ -30,17 +30,17 @@ client=myapp
 
 #Checking wget
 if [ ! -e "/usr/bin/wget" ]; then
-apt-get -y install wget
+sudo apt-get -y install wget
 fi
 
 #Checking mplayer
 if [ ! -e "/usr/bin/mplayer" ]; then
-apt-get -y install mplayer
+sudo apt-get -y install mplayer
 fi
 
 #Checking Xmlstarlet
 if [ ! -e "/usr/bin/xmlstarlet" ]; then
-apt-get -y install xmlstarlet
+sudo apt-get -y install xmlstarlet
 fi
 
 #Fonction getMusicDirectory par ID

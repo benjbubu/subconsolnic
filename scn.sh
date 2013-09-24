@@ -101,6 +101,14 @@ do
 	echo -e "$line\n"
 	mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
 	# on recupere je sais pas comment le pid de mplayer PIDmplayer
+	presencemplayer=`ps aux | grep subconsolnic | grep -v grep`
+	if [ -z "$presencemplayer" ]; then
+	echo "Mplayer ne tourne pas"
+	else
+	echo "Mplayer tourne"
+	fi
+	
+	
 	passe=false
 	while $passe
 	do

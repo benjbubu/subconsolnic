@@ -19,6 +19,8 @@
 # http://www.subsonic.org/pages/api.jsp      #
 ##############################################
 
+
+## PARAMETERS
 #Subsonic Server Parameter
 server=http://change.me
 user=changeme
@@ -26,8 +28,8 @@ password=changeme
 version=changeme
 client=myapp
 
-#Checking tools
 
+## CHECKING TOOLS
 #Checking wget
 if [ ! -e "/usr/bin/wget" ]; then
 sudo apt-get -y install wget
@@ -43,11 +45,21 @@ if [ ! -e "/usr/bin/xmlstarlet" ]; then
 sudo apt-get -y install xmlstarlet
 fi
 
+#Checking parameter of subsonic
+testserver=`wget -q "$server/rest/ping.view?u=$user&p=$password&v=$version&c=$client" -O - | grep status | awk -F" " '{print $3}' |sed -e 's/status=//g' |sed -e 's/"//g'`
+if [[ $testserver == ok ]]; then
+echo "Connexion au server OK"
+else
+echo "Le serveur ne ping pas. Verifiez les parametres du serveur"
+exit 0
+fi
+
+
+## FUNCTION REPO
 #Fonction getMusicDirectory par ID
 function getMusicDirectory {  
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&songCount=0&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@title,'      ' ,@artist,'      ',@id)" -n | cat -n | sed -e '$d'
 }
-
 
 #Fonction du menu de Listing
 function infosmenus {
@@ -72,15 +84,6 @@ done
 
 
 
-#Checking parameter of subsonic
-testserver=`wget -q "$server/rest/ping.view?u=$user&p=$password&v=$version&c=$client" -O - | grep status | awk -F" " '{print $3}' |sed -e 's/status=//g' |sed -e 's/"//g'`
-
-if [[ $testserver == ok ]]; then
-echo "Connexion au server OK"
-else
-echo "Le serveur ne ping pas. Verifiez les parametres du serveur"
-exit 0
-fi
 
 
 #Start menu

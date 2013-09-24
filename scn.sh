@@ -103,8 +103,8 @@ do
 	# on recupere je sais pas comment le pid de mplayer PIDmplayer
 	pidmplayer=`ps aux | grep subconsolnic | grep -v grep | awk '{print $2}'`
 	nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$line" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`
-	passe=false
-	while $passe
+	reste=true
+	while $reste
 	do
 		# clearscreen terminal ?
 		clear
@@ -115,7 +115,7 @@ do
 		o)
 			#kill mplayer
 			kill -15 $pidmplayer
-			passe=true
+			reste=false
 		;;
 		
 		*)
@@ -126,7 +126,7 @@ do
 			# rien
 			if [ -z "$pidmplayer" ]; then
 			echo "Mplayer ne tourne plus"
-			passe=true
+			reste=false
 			else
 			echo "Mplayer tourne encore"
 			fi

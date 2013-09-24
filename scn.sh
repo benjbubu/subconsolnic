@@ -111,7 +111,7 @@ do
 		echo "Vous ecoutez : $nowlisten"
 		echo "Passer a la chanson suivante : taper o"
 		read -t 1 choix
-		case choix in
+		case $choix in
 		o)
 			#kill mplayer
 			kill -15 $pidmplayer
@@ -130,7 +130,9 @@ do
 			else
 			echo "Mplayer tourne encore"
 			fi
-		;;
+	
+			;;
+		esac
 	done
 
 done

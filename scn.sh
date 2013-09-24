@@ -101,23 +101,20 @@ do
 	echo -e "$line\n"
 	mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
 	# on recupere je sais pas comment le pid de mplayer PIDmplayer
-	presencemplayer=`ps aux | grep subconsolnic | grep -v grep`
-	if [ -z "$presencemplayer" ]; then
-	echo "Mplayer ne tourne pas"
-	else
-	echo "Mplayer tourne"
-	fi
-	
-	
+	pidmplayer=`ps aux | grep subconsolnic | grep -v grep | awk '{print $2}'`
+	nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`
 	passe=false
 	while $passe
 	do
 		# clearscreen terminal ?
-		echo "passer a la chanson suivante : taper o"
+		clear
+		echo "Vous ecoutez : $nowlisten"
+		echo "Passer a la chanson suivante : taper o"
 		read -t 1 choix
 		case choix in
 		o)
 			#kill mplayer
+			kill -15 $pidmplayer
 			passe=true
 		;;
 		
@@ -127,6 +124,12 @@ do
 			# passe=true
 			# sinon :
 			# rien
+			if [ -z "$pidmplayer" ]; then
+			echo "Mplayer ne tourne plus"
+			passe=true
+			else
+			echo "Mplayer tourne encore"
+			fi
 		;;
 	done
 

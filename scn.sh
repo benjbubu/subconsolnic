@@ -63,22 +63,43 @@ wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$c
 
 #Fonction du menu de Listing
 function infosmenus {
-        echo "Taper l'ID pour plus d'informations sur le dossier"
-        echo -n "Ou taper q pour revenir au menu"
-        read id
-        if [ $(echo $id | grep -v [a-Z] | wc -l) -eq 0 ]; then
-        exec $0
-        else
-        getMusicDirectory
-	fi
+echo "############################"
+echo "#     Choix disponibles    #"
+echo "#	                         #"
+echo "# i -> infos sur dossier   #"
+echo "# p -> jouer album         #"
+echo "#any key -> menu principal #"
+echo "############################"
+read chapichapo
+
+case $chapichapo in 
+i)
+		echo -n "Taper l'ID pour plus d'informations sur le dossier"
+        	read id
+        	if [ $(echo $id | grep -v [a-Z] | wc -l) -eq 0 ]; then
+        		exec $0
+        	else
+        		getMusicDirectory
+		fi
+		;;
+p)
+		echo -n "Taper l'ID de l'album"
+		read id
+		jukebox
+		;;
+*)
+		exec $0
+		;;
+esac
 }
+
 
 #Fonction de streaming
 function jukebox {
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
 do
 echo -e "$line\n"
-mplayer -cache-min 2 -cache 51200 "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
+mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
 done
 }
 

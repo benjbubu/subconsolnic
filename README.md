@@ -32,6 +32,8 @@ Les paramètres actuels sont :
 -prefer-ipv4 : cela permet d'éviter les tentatives superflues de connexion en ipv6 au server
 -nocache : permet de lancer le stream plus vite
 
+Si mplayer coupe à cause de la connexion, enlevez l'option -nocache et ajoutez à la place "-cache-min 2 -cache 51200"
+
   ---------------------------------------
  
  
@@ -60,7 +62,8 @@ Les paramètres actuels sont :
  -prefer-ipv4 : force mplayer to connect only in ipv4
  -nocache : stream is faster 
  
- 
+ If mplayer doesn't stream correctly, remove the -nocache option and add "-cache-min 2 -cache 51200"
+
  To use it just, chmod +x scn.sh and launch it ! 
 
                                             

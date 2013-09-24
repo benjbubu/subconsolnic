@@ -27,7 +27,7 @@ server=http://changeme
 user=changeme
 password=changeme
 version=changeme
-client=myapp
+client=subconsolnic
 
 #Checking tools
 

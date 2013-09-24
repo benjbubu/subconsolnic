@@ -74,7 +74,7 @@ read chapichapo
 
 case $chapichapo in 
 i)
-		echo -n "Taper l'ID pour plus d'informations sur le dossier"
+		echo -n "Taper l'ID (chiffre sur la dernière colonne) pour plus d'informations sur le dossier"
         	read id
         	if [ $(echo $id | grep -v [a-Z] | wc -l) -eq 0 ]; then
         		exec $0
@@ -83,7 +83,7 @@ i)
 		fi
 		;;
 p)
-		echo -n "Taper l'ID de l'album"
+		echo -n "Taper l'ID de l'album (dernière colonne)"
 		read id
 		jukebox
 		;;
@@ -158,7 +158,7 @@ case $choice in
 ;;	
 
 		p) 
-			echo -n "Taper l'ID de l'album"
+			echo -n "Taper l'ID (dernière colonne) de l'album"
 			read id
 			jukebox
 			;;
@@ -181,7 +181,7 @@ case $choice in
 	;; 
 
 3)
-	echo -n "Entrer l'ID de l'album voulu"
+	echo -n "Entrer l'ID (dernière colonne) de l'album voulu"
 	read id
 	jukebox
 	echo $id

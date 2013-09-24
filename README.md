@@ -50,7 +50,7 @@ Si mplayer coupe à cause de la connexion, enlevez l'option -nocache et ajoutez 
  * Wget
  * Mplayer
  * Xmlstarlet
- * 
+ 
  The script will check if the 3 programs are present and will install them.
                                             
  Don't forget to change the parameters    

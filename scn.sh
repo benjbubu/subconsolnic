@@ -63,12 +63,13 @@ function infosmenus {
 
 #Fonction de streaming
 function jukebox {
-wget "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$myapp&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
+wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
 do
 echo -e "$line\n"
-mplayer -cache-min 2 -cache 51200 "$server/rest/download.view?u=$user&p=$password&v=$version&c=$myapp&id=$line" < /dev/null
+mplayer -cache-min 2 -cache 51200 "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
 done
 }
+
 
 
 #Checking parameter of subsonic

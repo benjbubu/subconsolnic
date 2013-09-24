@@ -36,6 +36,12 @@ Les paramètres actuels sont :
                                             
  This script allows you to search and play       
  your favorite music on a subsonic server
+ 
+ To use it you need :
+ * wget
+ * mplayer
+ * xmlstarlet
+ The script will check if the 3 programs are present and will install them.
                                             
  Don't forget to change the parameters    
  of the script (server, user, password, version)    

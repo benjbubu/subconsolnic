@@ -98,8 +98,30 @@ esac
 function jukebox {
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
 do
-echo -e "$line\n"
-mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
+	echo -e "$line\n"
+	mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
+	# on recupere je sais pas comment le pid de mplayer PIDmplayer
+	passe=false
+	while $passe
+	do
+		# clearscreen terminal ?
+		echo "passer a la chanson suivante : taper o"
+		read -t 1 choix
+		case choix in
+		o)
+			#kill mplayer
+			passe=true
+		;;
+		
+		*)
+			#test si mplayer est vivant = chanson pas finie
+			# si finie :
+			# passe=true
+			# sinon :
+			# rien
+		;;
+	done
+
 done
 }
 

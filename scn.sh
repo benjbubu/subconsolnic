@@ -99,7 +99,7 @@ function jukebox {
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
 do
 	echo -e "$line\n"
-	mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null
+	mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null &
 	# on recupere je sais pas comment le pid de mplayer PIDmplayer
 	pidmplayer=`ps aux | grep subconsolnic | grep -v grep | awk '{print $2}'`
 	nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$line" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`

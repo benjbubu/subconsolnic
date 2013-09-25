@@ -8,7 +8,7 @@
 #                                            #
 # Author : Benjbubu                          #
 # Contributor : LiZ                          #
-#                                            #
+# version 1.0                                         #
 # This script allows you to control a        #
 # a subsonic server (search and play music)  #
 #                                            #

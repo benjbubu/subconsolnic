@@ -125,7 +125,7 @@ mplayer -slave -input file=/tmp/mplayer.pipe -nocache -prefer-ipv4 -playlist /tm
 
 #sleep permettant d'attendre le lancement de mplayer avant 
 #le début des tests de présence du processus
-sleep 10
+sleep 8
 #	mplayer -quiet -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line"
 controlemplayer
 }
@@ -173,10 +173,10 @@ clear
 			echo "stop" > /tmp/mplayer.pipe
 			rm /tmp/mplayer.pipe
 			rm /tmp/playlist
-			exec $O
+			startmenu
 			;;
 		q|Q) 
-			exec $O
+			startmenu
 			;;
 
 		*)
@@ -190,6 +190,7 @@ esac
 
         #recup des infos de la chanson en cours         
         nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`
+function startmenu {
 #Start menu
 echo "Bienvenue sur Subconsolnic !"
 echo "Let's play !"
@@ -286,3 +287,5 @@ case $choice in
         exec $0
         ;;
 esac
+}
+startmenu

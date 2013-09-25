@@ -22,7 +22,7 @@
 
 ## PARAMETERS
 #Subsonic Server Parameter
-server=http://change.me
+server=changeme (ne pas mettre http://)
 user=changeme
 password=changeme
 version=changeme
@@ -55,7 +55,8 @@ exit 0
 fi
 
 
-## FUNCTION REPO
+## FUNCTION REPO ##
+
 #Fonction getMusicDirectory par ID
 function getMusicDirectory {  
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&songCount=0&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@title,'      ' ,@artist,'      ',@id)" -n | cat -n | sed -e '$d'
@@ -63,7 +64,7 @@ wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$c
 
 #Fonction du menu de Listing
 function infosmenus {
-echo "############################"
+echo "############################"
 echo "#     Choix disponibles    #"
 echo "#	                         #"
 echo "# i -> infos sur dossier   #"
@@ -96,52 +97,99 @@ esac
 
 #Fonction de streaming
 function jukebox {
+#Creation du fichier de controle mplayer en slave
+#si il n'existe pas
+fifo=`ls /tmp/ | grep mplayer.pipe`
+if [ -z $fifo ]; then
+mkfifo /tmp/mplayer.pipe
+fi
+
+#Suppression de la playlist existante
+presenceplaylist=`ls /tmp/ | grep playlist`
+if [ -z $presenceplaylist ]; then
+echo ""
+else
+rm /tmp/playlist
+fi
+
+
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
 do
-	echo -e "$line\n"
-	mplayer -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" < /dev/null &
-	# on recupere je sais pas comment le pid de mplayer PIDmplayer
-	pidmplayer=`ps aux | grep subconsolnic | grep -v grep | awk '{print $2}'`
-	nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$line" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`
-	echo "Vous ecoutez : $nowlisten"
-	echo "Passer a la chanson suivante : taper o"
-	
-	reste=true
-	while $reste
-	do
-		read -t 1 choix
-		case $choix in
-		o)
-			#kill mplayer
-			kill -15 $pidmplayer
-			reste=false
-		;;
-		
-		*)
-			#test si mplayer est vivant = chanson pas finie
-			# si finie :
-			# passe=true
-			# sinon :
-			# rien
-			if [ -z "$pidmplayer" ]; then
-			echo "Mplayer ne tourne plus, on passe à la chanson suivante"
-			reste=false
-			# plus besoin de ces lignes, mais je les laisse un peu
-			#else
-			#echo "Mplayer tourne encore"
-			fi
-	
-			;;
-		esac
-	done
-
+	#echo -e "$line\n"
+	echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
 done
+
+echo "Chargement de la chanson"
+	
+mplayer -slave -input file=/tmp/mplayer.pipe -nocache -prefer-ipv4 -playlist /tmp/playlist < /dev/null >/dev/null 2>&1 &
+
+#sleep permettant d'attendre le lancement de mplayer avant 
+#le début des tests de présence du processus
+sleep 10
+#	mplayer -quiet -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line"
+controlemplayer
 }
 
 
 
+function controlemplayer {
+clear
+
+        echo "#########################"
+        echo "#   CONTROLE MPLAYER    #"
+        echo "# P : Pause             #"
+        echo "# N : Chanson Suivante  #"
+        echo "# S : Stop player       #"
+	echo "# Q : Revenir au menu   #" 
+        echo "#########################"
+	echo "Vous ecoutez : $nowlisten"
+        read controle
+        
+	case $controle in 
+		p|P)
+			echo "pause" > /tmp/mplayer.pipe
+			echo "=====PAUSE====="
+			echo "Reprendre ? [O]"
+			echo "==============="
+		 	read resume
+				if [ $resume == O -o $resume == o ]; then
+				echo "pause" > /tmp/mplayer.pipe
+				=====Reprise=====
+				sleep 2
+				controlemplayer
+				else
+				echo "CHANSON EN PAUSE"
+				controlemplayer
+				fi
+			;;
+		n|N)
+			echo "pt_step 1" > /tmp/mplayer.pipe
+			echo "Chanson suivante..."
+			sleep 5
+			controlemplayer
+			;;
+		s|S)
+			echo "Arret du Player"
+			echo "stop" > /tmp/mplayer.pipe
+			rm /tmp/mplayer.pipe
+			rm /tmp/playlist
+			exec $O
+			;;
+		q|Q) 
+			exec $O
+			;;
+
+		*)
+			controlemplayer
+			;;
+esac
+
+} 
 
 
+
+        #recup des infos de la chanson en cours         
+        nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`
 #Start menu
 echo "Bienvenue sur Subconsolnic !"
 echo "Let's play !"
@@ -154,7 +202,11 @@ echo "| 1 -> Recherche Albums    |"
 echo "| 2 -> Parcourir dossiers  |"
 echo "| 3 -> Entrer ID           |"
 echo "| 4 -> Quitter             |"
+echo "| 5 -> Controle Player     |"
 echo "|__________________________|"
+echo "============================"
+echo "Vous ecoutez : $nowlisten"
+echo "============================"
 read choice
 
 
@@ -179,7 +231,7 @@ case $choice in
 	read choice2
 
 	case $choice2 in
-		v)  
+		v|V)  
 			echo -n "Taper l'ID (derniere colonne) de l'album"
 			read id
 			getMusicDirectory			
@@ -192,7 +244,7 @@ case $choice in
 			fi
 ;;	
 
-		p) 
+		p|P) 
 			echo -n "Taper l'ID (dernière colonne) de l'album"
 			read id
 			jukebox
@@ -219,7 +271,6 @@ case $choice in
 	echo -n "Entrer l'ID (dernière colonne) de l'album voulu"
 	read id
 	jukebox
-	echo $id
 	;;
 
 4)
@@ -227,6 +278,9 @@ case $choice in
 	exit 0
         ;;
 
+5) 
+	controlemplayer
+	;;		
 *)      
 	echo "Mauvaise touche boulet !"
         exec $0

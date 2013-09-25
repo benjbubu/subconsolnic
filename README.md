@@ -32,6 +32,8 @@ Les paramètres actuels sont :
 -prefer-ipv4 : cela permet d'éviter les tentatives superflues de connexion en ipv6 au server
 -nocache : permet de lancer le stream plus vite
 
+Vous ne devez pas toucher les autres options ! (playlist, slave, input)
+
 Si mplayer coupe à cause de la connexion, enlevez l'option -nocache et ajoutez à la place "-cache-min 2 -cache 51200"
 
   ---------------------------------------
@@ -62,6 +64,8 @@ Si mplayer coupe à cause de la connexion, enlevez l'option -nocache et ajoutez 
  You can change the options of mplayer for streaming. The actual parameters are : 
  -prefer-ipv4 : force mplayer to connect only in ipv4
  -nocache : stream is faster 
+
+Don't remove the other options ! (playlist, slave, input)
  
  If mplayer doesn't stream correctly, remove the -nocache option and add "-cache-min 2 -cache 51200"
 

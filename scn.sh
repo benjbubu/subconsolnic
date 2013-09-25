@@ -22,7 +22,7 @@
 
 ## PARAMETERS
 #Subsonic Server Parameter
-server=changeme (ne pas mettre http://)
+server=changeme (ne pas mettre les http://)
 user=changeme
 password=changeme
 version=changeme
@@ -56,7 +56,57 @@ fi
 
 
 ## FUNCTION REPO ##
+#Fonction de recherche
+function recherche {
+echo "Recherche d'albums par artiste/piste/albums"
+        echo -n "Tapez votre recherche"
+        read search
+        echo "Je recherche tout de suite :" $search
+        #Envoi de la requete via l'api
+        wget -q "$server/rest/search2.view?u=$user&p=$password&v=$version&c=$client&songCount=0&query=$search&songCount=0" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:album" -v "concat(@title, '     ', @album, '      ', @artist, '    ', @id)" -n | cat -n | sed -e '$d'
 
+
+        
+        echo "################################"
+        echo "#  Choix possibles :           #"
+        echo "# v -> voir contenu de l'album #"
+        echo "# p -> jouer l'album           #"
+	echo "# q -> menu principal          #"
+	echo "# autre -> nouvelle recherche  #"
+        echo "################################"
+        read choice2
+        
+        case $choice2 in
+                v|V)    
+                        echo -n "Taper l'ID (derniere colonne) de l'album"
+                        read id
+                        getMusicDirectory            
+                        echo -n "Jouer l'album ? O/N"
+                        read play
+                        if [[ $play == O ]]; then
+                        jukebox
+                        else
+                        recherche
+  		        fi
+			;;
+		 p|P)
+                        echo -n "Taper l'ID (dernière colonne) de l'album"
+                        read id
+                        jukebox
+                        ;;
+		q|Q)
+			startmenu
+			;;
+
+                *)
+                        recherche
+                        ;;
+                esac
+        
+
+
+
+}
 #Fonction getMusicDirectory par ID
 function getMusicDirectory {  
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&songCount=0&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@title,'      ' ,@artist,'      ',@id)" -n | cat -n | sed -e '$d'
@@ -66,10 +116,10 @@ wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$c
 function infosmenus {
 echo "############################"
 echo "#     Choix disponibles    #"
-echo "#	                         #"
+echo "#                          #"
 echo "# i -> infos sur dossier   #"
 echo "# p -> jouer album         #"
-echo "#any key -> menu principal #"
+echo "# autre -> menu principal  #"
 echo "############################"
 read chapichapo
 
@@ -114,6 +164,9 @@ else
 rm /tmp/playlist
 fi
 
+#Verification si une autre session de mplayer est en cours
+presencemplayer=`ps aux | grep "/tmp/playlist" | grep -v grep | awk '{print $2}'`
+kill -15 $presencemplayer >/dev/null 2>&1
 
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
 do
@@ -150,19 +203,11 @@ clear
 	case $controle in 
 		p|P)
 			echo "pause" > /tmp/mplayer.pipe
-			echo "=====PAUSE====="
-			echo "Reprendre ? [O]"
-			echo "==============="
-		 	read resume
-				if [ $resume == O -o $resume == o ]; then
-				echo "pause" > /tmp/mplayer.pipe
-				=====Reprise=====
-				sleep 2
-				controlemplayer
-				else
-				echo "CHANSON EN PAUSE"
-				controlemplayer
-				fi
+			echo "=================PAUSE==============="
+			echo "Appuyez sur une touche pour reprendre"
+			read -p "====================================="
+			echo "pause" > /tmp/mplayer.pipe	
+			controlemplayer
 			;;
 		n|N)
 			echo "pt_step 1" > /tmp/mplayer.pipe
@@ -194,8 +239,7 @@ esac
         nowlisten=`wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat(@title,'       ',@artist,'       ',@album)" -n`
 function startmenu {
 #Start menu
-echo "Bienvenue sur Subconsolnic !"
-echo "Let's play !"
+clear
 echo " --------------------------"
 echo "| S-U-B-C-O-N-S-O-L-N-I-C  |"
 echo "|__________________________|"
@@ -217,49 +261,8 @@ case $choice in
 
 1)
 
-	echo "Recherche d'albums par artiste/piste/albums"
-        echo -n "Tapez votre recherche"
-	read search
-	echo "Je recherche tout de suite :" $search
-        #Envoi de la requete via l'api
-        wget -q "$server/rest/search2.view?u=$user&p=$password&v=$version&c=$client&songCount=0&query=$search&songCount=0" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:album" -v "concat(@title, '     ', @album, '      ', @artist, '    ', @id)" -n | cat -n | sed -e '$d'
-
-
-
-	echo "################################"
-	echo "#  Choix possibles :           #"
-	echo "# v -> voir contenu de l'album #"
-	echo "# p -> jouer l'album	     #"
-	echo "################################"
-	read choice2
-
-	case $choice2 in
-		v|V)  
-			echo -n "Taper l'ID (derniere colonne) de l'album"
-			read id
-			getMusicDirectory			
-			echo -n "Jouer l'album ? O/N"
-			read play
-			if [[ $play == O ]]; then
-			jukebox
-			else
-			exec $0
-			fi
-;;	
-
-		p|P) 
-			echo -n "Taper l'ID (dernière colonne) de l'album"
-			read id
-			jukebox
-			;;
-
-		*) 
-			echo "Mauvaise touche,boulet" 
-			exec 0
-			;;
-		esac
-        ;;
-
+	recherche	
+	;;
 2) 
 	#Liste de tous les dossiers		
 	wget -q "$server/rest/getIndexes.view?u=$user&p=$password&v=$version&c=$client" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:artist" -v "concat(@name,'   ',@id)" -n
@@ -278,6 +281,9 @@ case $choice in
 
 4)
         echo "Good luck without sound !"
+	rm /tmp/mplayer.pipe > /dev/null 2>&1
+	rm /tmp/playlist > /dev/null 2>&1
+	kill -15 $presencemplayer > /dev/null 2>&1
 	exit 0
         ;;
 
@@ -286,8 +292,11 @@ case $choice in
 	;;		
 *)      
 	echo "Mauvaise touche boulet !"
-        exec $0
+        starmenu
         ;;
 esac
 }
+echo "Bienvenue sur Subconsolnic !"
+echo "Let's Play !"
+sleep 1
 startmenu

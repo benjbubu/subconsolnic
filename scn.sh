@@ -97,13 +97,15 @@ esac
 
 #Fonction de streaming
 function jukebox {
+	
+echo "Preparation du lecteur..."
 #Creation du fichier de controle mplayer en slave
 #si il n'existe pas
 fifo=`ls /tmp/ | grep mplayer.pipe`
 if [ -z $fifo ]; then
 mkfifo /tmp/mplayer.pipe
 fi
-
+echo "..."
 #Suppression de la playlist existante
 presenceplaylist=`ls /tmp/ | grep playlist`
 if [ -z $presenceplaylist ]; then
@@ -119,13 +121,13 @@ do
 	echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
 done
 
-echo "Chargement de la chanson"
+echo "Chargement de la chanson..."
 	
 mplayer -slave -input file=/tmp/mplayer.pipe -nocache -prefer-ipv4 -playlist /tmp/playlist < /dev/null >/dev/null 2>&1 &
 
 #sleep permettant d'attendre le lancement de mplayer avant 
 #le début des tests de présence du processus
-sleep 8
+sleep 5
 #	mplayer -quiet -prefer-ipv4 -nocache "$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line"
 controlemplayer
 }

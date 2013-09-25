@@ -22,7 +22,7 @@
 
 ## PARAMETERS
 #Subsonic Server Parameter
-server=changeme (ne pas mettre les http://)
+server=changeme #(ne pas mettre les http://)
 user=changeme
 password=changeme
 version=changeme

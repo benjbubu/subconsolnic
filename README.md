@@ -2,7 +2,7 @@ subconsolnic
 ============
 
 A script to use subsonic in console
-Version : 1.0
+Version : 2.0
 
 The scn.sh is in French
 If you want it in english, download scn_en.sh

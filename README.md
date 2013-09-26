@@ -2,7 +2,8 @@ subconsolnic
 ============
 
 A script to use subsonic in console
-Version : 2.0
+
+Version : 2.1
 
 The scn.sh is in French
 If you want it in english, download scn_en.sh
@@ -13,6 +14,7 @@ If you want it in english, download scn_en.sh
 Script forké et inspiré par SubsonicPlayerCLI by ts123
 
 Ce script permet de controler un serveur subsonic directement depuis votre console
+en utilisant l'ID unique qui identifie les fichiers et dossiers de subsonic
 
 Pour l'utiliser vous avez besoin 
 * Wget
@@ -36,6 +38,28 @@ Vous ne devez pas toucher les autres options ! (playlist, slave, input)
 
 Si mplayer coupe à cause de la connexion, enlevez l'option -nocache et ajoutez à la place "-cache-min 2 -cache 51200"
 
+
+Attention le script lit directement le contenu d'un dossier. Si vous indiquez un dossier qui contient des sous-dossiers
+à lire, le script ne fonctionnera pas. 
+
+Exemple : 
+ 
+     Dossier 1--
+              |->Fichier 1
+              |->Fichier 2
+              
+     --> Avec l'id du dossier 1, le script va lire le contenu de celui-ci
+               
+      Dossier 1--
+                |-> Dossier 2 --
+                               |->Fichier 1
+                               |->Fichier 2
+                
+                |-> Dossier 3 --
+                               |->Fichier 3
+                               |->Fichier 4
+     --> Vous devez indiquer l'ID du sous-dossier 2 ou 3 pour lire leurs fichiers et non l'ID du dossier 1
+
   ---------------------------------------
  
  
@@ -46,6 +70,8 @@ Si mplayer coupe à cause de la connexion, enlevez l'option -nocache et ajoutez 
                                             
  This script allows you to search and play       
  your favorite music on a subsonic server
+ by using the unique ID of each file and folder
+ of subsonic
  
  
  To use it you need :
@@ -71,6 +97,25 @@ Don't remove the other options ! (playlist, slave, input)
 
  To use it just, chmod +x scn.sh and launch it ! 
 
-                                            
+ Warning : The script reads directly the folder that you want. But if you ask to play a folder with
+ sub-folders, it doesn't work ! 
+ 
+ Example : 
+ 
+     Folder 1--
+              |->File 1
+              |->File 2
+              
+     --> With the ID of the Folder 1, the script will play the files inside this folder
+               
+       Folder 1--
+                |-> Folder 2 --
+                              |->File 1
+                              |->File 2
+                
+                |-> Folder 3 --
+                              |->File 3
+                              |->File 4
+     --> You need to take the ID of the sub-folder 2 or 3 to play the files and not the main folder 1
   
                                          

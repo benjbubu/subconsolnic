@@ -150,6 +150,8 @@ esac
 function jukebox {
 #Creation du fichier de controle mplayer en slave
 #si il n'existe pas
+
+echo "Chargement du lecteur..."
 fifo=`ls /tmp/ | grep mplayer.pipe`
 if [ -z $fifo ]; then
 mkfifo /tmp/mplayer.pipe
@@ -162,6 +164,16 @@ echo ""
 else
 rm /tmp/playlist
 fi
+
+#Verification de la présence de Mplayer
+pidmplayer=`ps aux | grep /tmp/mplayer.pipe | grep -v grep | awk '{print $2}'`
+if [ -z $pidmplayer ]; then
+echo ""
+else
+kill -15 $pidmplayer
+fi
+
+
 
 
 wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 

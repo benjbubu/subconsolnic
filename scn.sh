@@ -55,6 +55,51 @@ exit 0
 fi
 
 ## FUNCTION REPO ##
+#Fonction Recherche
+function recherche {
+echo "Recherche d'albums par artiste/piste/albums"
+        echo -n "Tapez votre recherche"
+	read search
+	echo "Je recherche tout de suite :" $search
+        #Envoi de la requete via l'api
+        wget -q "$server/rest/search2.view?u=$user&p=$password&v=$version&c=$client&songCount=0&query=$search&songCount=0" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:album" -v "concat(@title, '     ', @album, '      ', @artist, '    ', @id)" -n | cat -n | sed -e '$d'
+
+
+
+	echo "################################"
+	echo "#  Choix possibles :           #"
+	echo "# v -> voir contenu de l'album #"
+	echo "# p -> jouer l'album	     #"
+	echo "# autre touche -> retour       #"
+	echo "################################"
+	read choice2
+
+	case $choice2 in
+		v|V)  
+			echo -n "Taper l'ID (derniere colonne) de l'album"
+			read id
+			getMusicDirectory			
+			echo -n "Jouer l'album ? O/N"
+			read play
+			if [[ $play == O ]]; then
+			jukebox
+			else
+			exec $0
+			fi
+			;;	
+
+		p|P) 
+			echo -n "Taper l'ID (dernière colonne) de l'album"
+			read id
+			jukebox
+			;;
+
+		*) 
+			recherche
+			;;
+		esac
+        
+}
 
 #Fonction getMusicDirectory par ID
 function getMusicDirectory {  
@@ -242,49 +287,8 @@ read choice
 case $choice in
 
 1)
-
-	echo "Recherche d'albums par artiste/piste/albums"
-        echo -n "Tapez votre recherche"
-	read search
-	echo "Je recherche tout de suite :" $search
-        #Envoi de la requete via l'api
-        wget -q "$server/rest/search2.view?u=$user&p=$password&v=$version&c=$client&songCount=0&query=$search&songCount=0" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:album" -v "concat(@title, '     ', @album, '      ', @artist, '    ', @id)" -n | cat -n | sed -e '$d'
-
-
-
-	echo "################################"
-	echo "#  Choix possibles :           #"
-	echo "# v -> voir contenu de l'album #"
-	echo "# p -> jouer l'album	     #"
-	echo "################################"
-	read choice2
-
-	case $choice2 in
-		v|V)  
-			echo -n "Taper l'ID (derniere colonne) de l'album"
-			read id
-			getMusicDirectory			
-			echo -n "Jouer l'album ? O/N"
-			read play
-			if [[ $play == O ]]; then
-			jukebox
-			else
-			exec $0
-			fi
-;;	
-
-		p|P) 
-			echo -n "Taper l'ID (dernière colonne) de l'album"
-			read id
-			jukebox
-			;;
-
-		*) 
-			exec 0
-			;;
-		esac
-        ;;
-
+	recherche	
+	;;
 2) 
 	#Liste de tous les dossiers		
 	wget -q "$server/rest/getIndexes.view?u=$user&p=$password&v=$version&c=$client" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:artist" -v "concat(@name,'   ',@id)" -n

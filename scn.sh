@@ -71,6 +71,7 @@ echo "Recherche d'albums par artiste/piste/albums"
 	echo "# v -> voir contenu de l'album #"
 	echo "# p -> jouer l'album	     #"
 	echo "# autre touche -> retour       #"
+	echo "# q -> menu principal	     #"
 	echo "################################"
 	read choice2
 
@@ -92,6 +93,10 @@ echo "Recherche d'albums par artiste/piste/albums"
 			echo -n "Taper l'ID (dernière colonne) de l'album"
 			read id
 			jukebox
+			;;
+			
+		q|Q)
+			startmenu
 			;;
 
 		*) 

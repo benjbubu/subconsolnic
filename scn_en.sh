@@ -149,6 +149,7 @@ esac
 #Streaming function
 function jukebox {
 #Checking if a mplayer's file of slave mode is present
+echo "Loading Player"
 fifo=`ls /tmp/ | grep mplayer.pipe`
 if [ -z $fifo ]; then
 mkfifo /tmp/mplayer.pipe
@@ -160,6 +161,14 @@ if [ -z $presenceplaylist ]; then
 echo ""
 else
 rm /tmp/playlist
+fi
+
+#Checking presence of mplayer
+pidmplayer=`ps aux | grep /tmp/mplayer.pipe | grep -v grep | awk '{print $2}'`
+if [ -z $pidmplayer ]; then
+echo ""
+else
+kill -15 $pidmplayer
 fi
 
 

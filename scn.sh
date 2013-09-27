@@ -59,7 +59,10 @@ fi
 ## FUNCTION REPO ##
 #Fonction Recherche
 function recherche {
-echo "Recherche d'albums par artiste/piste/albums"
+    boucleRecherche=true
+    while $boucleRecherche
+    do
+	echo "Recherche d'albums par artiste/piste/albums"
         echo -n "Tapez votre recherche"
 	read search
 	echo "Je recherche tout de suite :" $search
@@ -72,143 +75,150 @@ echo "Recherche d'albums par artiste/piste/albums"
 	echo "#  Choix possibles :           #"
 	echo "# v -> voir contenu de l'album #"
 	echo "# p -> jouer l'album	     #"
-	echo "# autre touche -> retour       #"
-	echo "# q -> menu principal	     #"
+	#echo "# autre touche -> retour       #"
+	echo "# q -> retour menu principal   #"
 	echo "################################"
 	read choice2
 
 	case $choice2 in
-		v|V)  
+		v|V)   # voir le contenu de l'album
 			echo -n "Taper l'ID (derniere colonne) de l'album"
 			read id
 			getMusicDirectory			
-			echo -n "Jouer l'album ? O/N"
-			read play
-			if [[ $play == O ]]; then
-			jukebox
-			else
-			exec $0
-			fi
+			# on reste dans la boucle recherche
 			;;	
 
-		p|P) 
+		p|P)    # jouer l'album
 			echo -n "Taper l'ID (dernière colonne) de l'album"
 			read id
 			jukebox
+			# une fois la lecture/jukebox finie, on revient au menuPrincipal
+			boucleRecherche=false
 			;;
 			
-		q|Q)
-			startmenu
+		q|Q)    # retour au menu principal = quitter recherche
+			boucleRecherche=false
 			;;
 
-		*) 
-			recherche
+		*) 	# saisie erronée
+			echo "Saisie erronée, veuillez recommencer"
+			# on reste dans la boucle recherche
 			;;
-		esac
-        
+	esac
+
+    done
+   
 }
 
 #Fonction getMusicDirectory par ID
 function getMusicDirectory {  
-wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&songCount=0&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@title,'      ' ,@artist,'      ',@id)" -n | cat -n | sed -e '$d'
+	wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&songCount=0&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@title,'      ' ,@artist,'      ',@id)" -n | cat -n | sed -e '$d'
 }
 
 #Fonction du menu de Listing
 function infosmenus {
-echo "############################"
-echo "#     Choix disponibles    #"
-echo "#	                         #"
-echo "# i -> infos sur dossier   #"
-echo "# p -> jouer album         #"
-echo "#any key -> menu principal #"
-echo "############################"
-read chapichapo
-
-case $chapichapo in 
-i)
+    boucleInfosmenus=true
+    while $boucleInfosmenus
+    do
+	echo "############################"
+	echo "#     Choix disponibles    #"
+	echo "#	                         #"
+	echo "# i -> infos sur dossier   #"
+	echo "# p -> jouer album         #"
+	echo "# q -> menu principal      #"
+	echo "############################"
+	read chapichapo
+	
+	case $chapichapo in 
+	i)	# infos sur le dossier
 		echo -n "Taper l'ID (chiffre sur la dernière colonne) pour plus d'informations sur le dossier"
         	read id
         	if [ $(echo $id | grep -v [a-Z] | wc -l) -eq 0 ]; then
-        		exec $0
+        		echo "Saisie erronée, veuillez recommencer"
         	else
         		getMusicDirectory
 		fi
 		;;
-p)
+	p)	# jouer l'album
 		echo -n "Taper l'ID de l'album (dernière colonne)"
 		read id
 		jukebox
+		# une fois la lecture/jukebox finie, retour au menuPrincipal
+		boucleInfosmenus=false
 		;;
-*)
-		exec $0
+	q|Q)	# retour menuPrincipal = quitter boucle infosMenus
+		boucleInfosmenus=false
 		;;
-esac
+			
+	*)	echo "Saisie erronée, veuillez recommencer"
+		;;
+	esac
+    done
 }
 
 
 #Fonction de streaming
 function jukebox {
-#Creation du fichier de controle mplayer en slave
-#si il n'existe pas
+	#Creation du fichier de controle mplayer en slave
+	#si il n'existe pas
 
-echo "Chargement du lecteur..."
-fifo=`ls /tmp/ | grep mplayer.pipe`
-if [ -z $fifo ]; then
-mkfifo /tmp/mplayer.pipe
-fi
-
-#Suppression de la playlist existante
-presenceplaylist=`ls /tmp/ | grep playlist`
-if [ -z $presenceplaylist ]; then
-echo ""
-else
-rm /tmp/playlist
-fi
-
-#Verification de la présence de Mplayer
-pidmplayer=`ps aux | grep /tmp/mplayer.pipe | grep -v grep | awk '{print $2}'`
-if [ -z $pidmplayer ]; then
-echo ""
-else
-kill -15 $pidmplayer
-fi
-
-
-
-
-wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
-do
-	#echo -e "$line\n"
-	echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
-done
-
-echo "Chargement de la chanson"
+	echo "Chargement du lecteur..."
+	fifo=`ls /tmp/ | grep mplayer.pipe`
+	if [ -z $fifo ]; then
+	mkfifo /tmp/mplayer.pipe
+	fi
 	
-nohup mplayer -slave -input file=/tmp/mplayer.pipe -nocache -prefer-ipv4 -playlist /tmp/playlist > /tmp/scnlog 2>/dev/null &
+	#Suppression de la playlist existante
+	presenceplaylist=`ls /tmp/ | grep playlist`
+	if [ -z $presenceplaylist ]; then
+	echo ""
+	else
+	rm /tmp/playlist
+	fi
+	
+	#Verification de la présence de Mplayer
+	pidmplayer=`ps aux | grep /tmp/mplayer.pipe | grep -v grep | awk '{print $2}'`
+	if [ -z $pidmplayer ]; then
+	echo ""
+	else
+	kill -15 $pidmplayer
+	fi
+	
 
-echo "..."
-#sleep permettant d'attendre le lancement de mplayer avant 
-#le début des tests de présence du processus
-sleep 5
-controlemplayer
+	wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
+	do
+		#echo -e "$line\n"
+		echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
+	done
+	
+	echo "Chargement de la chanson"
+		
+	nohup mplayer -slave -input file=/tmp/mplayer.pipe -nocache -prefer-ipv4 -playlist /tmp/playlist > /tmp/scnlog 2>/dev/null &
+	
+	echo "..."
+	#sleep permettant d'attendre le lancement de mplayer avant 
+	#le début des tests de présence du processus
+	sleep 5
+	controlemplayer
 }
 
 
 
 function controlemplayer {
-
-while true; do
-
-recuperationid=`cat /tmp/scnlog | grep subconsolnic | awk END{print} | awk -F"id=" '{print $2}' | sed -e 's/\.//g'`
-
-wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$recuperationid" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat('Titre : ', @title)" -n -o " " -n -v "concat('Artiste : ', @artist)" -n -o " " -n -v "concat('Album : ',@album)" > /tmp/lolog
-
-clear
-echo " Vous ecoutez actuellement :"
-echo ""
-cat /tmp/lolog
-echo ""
-echo ""
+    boucleControlemplayer=true
+    while true
+    do
+	
+	recuperationid=`cat /tmp/scnlog | grep subconsolnic | awk END{print} | awk -F"id=" '{print $2}' | sed -e 's/\.//g'`
+	
+	wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$recuperationid" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat('Titre : ', @title)" -n -o " " -n -v "concat('Artiste : ', @artist)" -n -o " " -n -v "concat('Album : ',@album)" > /tmp/lolog
+	
+	clear
+	echo " Vous ecoutez actuellement :"
+	echo ""
+	cat /tmp/lolog
+	echo ""
+	echo ""
         echo "#########################"
         echo "#   CONTROLE MPLAYER    #"
         echo "# P : Pause             #"
@@ -219,12 +229,12 @@ echo ""
 	echo "# R : Reculer morceau   #"
 	echo "#                       #"
 	echo "# S : Stop player       #"
-	echo "# Q : Revenir au menu   #" 
+	#echo "# Q : Revenir au menu   #" ## UTILITE ? c'est mieux le stop ! 
         echo "#########################"
-        read -t 1 -n 1 controle && break
- done       
+        read -t 1 -n 1 controle
+        
 	case $controle in 
-		p|P)
+		p|P)	# PAUSE
 			echo "pause" > /tmp/mplayer.pipe
 			echo "=====PAUSE====="
 			echo "Reprendre ? [O]"
@@ -233,33 +243,31 @@ echo ""
 			echo "=====Reprise===="
 			echo "pause" > /tmp/mplayer.pipe
 			sleep 1
-			controlemplayer
 			;;
-		n|N)
+			
+		n|N)	# chanson suivante
 			echo "pt_step 1" > /tmp/mplayer.pipe
 			echo "Chanson suivante..."
 			sleep 5
-			controlemplayer
 			;;
 
-		b|B)
+		b|B)	# chanson précédente
 			echo "pt_step -1" > /tmp/mplayer.pipe
 			echo "Chanson precedente..."
 			sleep 5
-			controlemplayer
 			;;
 		
-		e|E)
+		e|E)	# avance rapide
 			echo "Avance Rapide"
 			echo "seek +20" > /tmp/mplayer.pipe
-			controlemplayer
 			;;
-		r|R)
+			
+		r|R)	# retour rapide
 			echo "Retour arriere"
 			echo "seek -20" > /tmp/mplayer.pipe
-			controlemplayer
 			;;
-		s|S)
+			
+		s|S)	# stop et retour menuprincipal
 			echo "Arret du Player"
 			echo "stop" > /tmp/mplayer.pipe
 			echo "Suppression du controleur mplayer.pipe"
@@ -269,17 +277,18 @@ echo ""
 			echo "Suppression des logs"
 			rm /tmp/scnlog
 			rm /tmp/lolog
-			startmenu
+			# on quitte et on revient au menu principal
+			boucleControlemplayer=false
 			;;
-		q|Q) 
-			startmenu
-			;;
+		#q|Q	# UTILITE ? on a le STOP au dessus 
+		#	# on quitte et on revient au menu principal
+		#	boucleControlemplayer=false
+		#	;;
 
-		*)
-			controlemplayer
+		*)	# Soit la saisie est erronée, soit le read est parti en timeout : on n'a rien écrit
 			;;
-esac
-
+	esac
+    done
 } 
 
 
@@ -287,56 +296,61 @@ esac
 
 function startmenu {
 #Start menu
-echo "Bienvenue sur Subconsolnic !"
-echo "Let's play !"
-echo " --------------------------"
-echo "| S-U-B-C-O-N-S-O-L-N-I-C  |"
-echo "|__________________________|"
-echo "|                          |"
-echo "|   Touches Disponibles    |"
-echo "| 1 -> Recherche Albums    |"
-echo "| 2 -> Parcourir dossiers  |"
-echo "| 3 -> Entrer ID           |"
-echo "| 4 -> Quitter             |"
-echo "| 5 -> Controle Player     |"
-echo "|__________________________|"
-read choice
-
-
-case $choice in
-
-1)
-	recherche	
-	;;
-2) 
-	#Liste de tous les dossiers		
-	wget -q "$server/rest/getIndexes.view?u=$user&p=$password&v=$version&c=$client" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:artist" -v "concat(@name,'   ',@id)" -n
-	while true
-	do
-	infosmenus
-	done
-
-	;; 
-
-3)
-	echo -n "Entrer l'ID (dernière colonne) de l'album voulu"
-	read id
-	jukebox
-	;;
-
-4)
-        echo "Good luck without sound !"
-	echo "stop" > /tmp/mplayer.pipe
-	rm /tmp/playlist /tmp/scnlog /tmp/lolog /tmp/mplayer.pipe 2>/dev/null
-	exit 0
-        ;;
-
-5) 
-	controlemplayer
-	;;		
-*)      
-        startmenu
-        ;;
+	echo "Bienvenue sur Subconsolnic !"
+	echo "Let's play !"
+	echo " --------------------------"
+	echo "| S-U-B-C-O-N-S-O-L-N-I-C  |"
+	echo "|__________________________|"
+	echo "|                          |"
+	echo "|   Touches Disponibles    |"
+	echo "| 1 -> Recherche Albums    |"
+	echo "| 2 -> Parcourir dossiers  |"
+	echo "| 3 -> Entrer ID           |"
+	echo "| 4 -> Quitter             |"
+	#echo "| 5 -> Controle Player     |" # UTILITE ? si on a pas lancé le jukebox, mplayer n'est pas lancé...
+	echo "|__________________________|"
+	read choice
+	
+	
+	case $choice in
+	
+	1)	# rechercher un album, artiste...
+		recherche	
+		;;
+		
+	2) 	#Liste de tous les dossiers		
+		wget -q "$server/rest/getIndexes.view?u=$user&p=$password&v=$version&c=$client" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:artist" -v "concat(@name,'   ',@id)" -n
+		infosmenus
+		;; 
+	
+	3)	# jouer un ID connu
+		echo -n "Entrer l'ID (dernière colonne) de l'album voulu"
+		read id
+		jukebox
+		;;
+	
+	4)	# QUITTER
+	        echo "Good luck without sound !"
+		echo "stop" > /tmp/mplayer.pipe
+		rm /tmp/playlist /tmp/scnlog /tmp/lolog /tmp/mplayer.pipe 2>/dev/null
+		exit 0
+	        ;;
+	
+	#5) 	# UTILITE ? mplayer n'est pas lancé ? on est pas passé par le jukebox
+	#	controlemplayer
+	#	;;
+	
+	*)      # mauvaise saisie
+		echo "Saisie erronée, veuillez recommencer"
+	        ;;
 esac
 }
-startmenu
+
+
+## MAIN LOOP
+while true
+do
+	startmenu
+done
+
+

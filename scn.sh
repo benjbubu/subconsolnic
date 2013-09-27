@@ -6,7 +6,7 @@
 #                                            #
 # Forked from SubsonicPlayerCLI by ts123     #
 #                                            #
-# Version : 2.1                              #
+# Version : 2.2                              #
 #                                            #
 # Author : Benjbubu                          #
 # Contributor : LiZ                          #

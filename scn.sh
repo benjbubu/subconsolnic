@@ -78,7 +78,7 @@ function recherche {
 	#echo "# autre touche -> retour       #"
 	echo "# q -> retour menu principal   #"
 	echo "################################"
-	read choice2
+	read -n 1 choice2
 
 	case $choice2 in
 		v|V)   # voir le contenu de l'album
@@ -127,7 +127,7 @@ function infosmenus {
 	echo "# p -> jouer album         #"
 	echo "# q -> menu principal      #"
 	echo "############################"
-	read chapichapo
+	read -n 1 chapichapo
 	
 	case $chapichapo in 
 	i)	# infos sur le dossier
@@ -174,20 +174,7 @@ function jukebox {
 	if [ -z $presenceplaylist ]; then
 	echo ""
 	else
-	echo "Une playlist existe deja (et surement en cours de lecture)"
-	echo "Voulez vous ajouter les chansons a la suite ? [O/N]"
-		read -t 1 -n 1 addplaylist
-		elif [ $addplaylist == O -o $addplaylist == o ]; then
-		#ajout de l'album voulu a la suite de la playlist en cours
-		wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
-		do
-		#echo -e "$line\n"
-		echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
-		else
-		#on supprime la vieille playlist pour remplacer par la nouvelle
-		rm /tmp/playlist
-		done
-	fi
+	rm /tmp/playlist
 	fi
 	
 	#Verification de la présence de Mplayer et continuite de la playlist
@@ -322,7 +309,7 @@ function startmenu {
 	echo "| 3 -> Entrer ID           |"
 	echo "| 4 -> Quitter             |"
 	echo "|__________________________|"
-	read choice
+	read -n 1 choice
 	
 	
 	case $choice in

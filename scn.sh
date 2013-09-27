@@ -307,7 +307,8 @@ function startmenu {
 	echo "| 1 -> Recherche Albums    |"
 	echo "| 2 -> Parcourir dossiers  |"
 	echo "| 3 -> Entrer ID           |"
-	echo "| 4 -> Quitter             |"
+	echo "| 4 -> controler mplayer   |"
+	echo "| 5 -> Quitter             |"
 	echo "|__________________________|"
 	read -n 1 choice
 	
@@ -328,8 +329,11 @@ function startmenu {
 		read id
 		jukebox
 		;;
+		
+	4)	# on relance le controlemplayer
+		controlemplayer
 	
-	4)	# QUITTER
+	5)	# QUITTER
 	        echo "Good luck without sound !"
 		echo "stop" > /tmp/mplayer.pipe
 		rm /tmp/playlist /tmp/scnlog /tmp/lolog /tmp/mplayer.pipe 2>/dev/null

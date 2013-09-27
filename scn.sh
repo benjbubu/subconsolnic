@@ -168,15 +168,29 @@ function jukebox {
 	mkfifo /tmp/mplayer.pipe
 	fi
 	
+	
 	#Suppression de la playlist existante
 	presenceplaylist=`ls /tmp/ | grep playlist`
 	if [ -z $presenceplaylist ]; then
 	echo ""
 	else
-	rm /tmp/playlist
+	echo "Une playlist existe deja (et surement en cours de lecture)"
+	echo "Voulez vous ajouter les chansons a la suite ? [O/N]"
+		read -t 1 -n 1 addplaylist
+		elif [ $addplaylist == O -o $addplaylist == o ]; then
+		#ajout de l'album voulu a la suite de la playlist en cours
+		wget -q "$server/rest/getMusicDirectory.view?u=$user&p=$password&v=$version&c=$client&id=$id" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:child" -v "concat(@id,'  ')" -n | while read line 
+		do
+		#echo -e "$line\n"
+		echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
+		else
+		#on supprime la vieille playlist pour remplacer par la nouvelle
+		rm /tmp/playlist
+		done
+	fi
 	fi
 	
-	#Verification de la présence de Mplayer
+	#Verification de la présence de Mplayer et continuite de la playlist
 	pidmplayer=`ps aux | grep /tmp/mplayer.pipe | grep -v grep | awk '{print $2}'`
 	if [ -z $pidmplayer ]; then
 	echo ""
@@ -206,7 +220,7 @@ function jukebox {
 
 function controlemplayer {
     boucleControlemplayer=true
-    while true
+    while $boucleControlemplayer
     do
 	
 	recuperationid=`cat /tmp/scnlog | grep subconsolnic | awk END{print} | awk -F"id=" '{print $2}' | sed -e 's/\.//g'`
@@ -229,7 +243,7 @@ function controlemplayer {
 	echo "# R : Reculer morceau   #"
 	echo "#                       #"
 	echo "# S : Stop player       #"
-	#echo "# Q : Revenir au menu   #" ## UTILITE ? c'est mieux le stop ! 
+	echo "# Q : Revenir au menu   #"
         echo "#########################"
         read -t 1 -n 1 controle
         
@@ -280,10 +294,10 @@ function controlemplayer {
 			# on quitte et on revient au menu principal
 			boucleControlemplayer=false
 			;;
-		#q|Q	# UTILITE ? on a le STOP au dessus 
-		#	# on quitte et on revient au menu principal
-		#	boucleControlemplayer=false
-		#	;;
+		q|Q	
+			# on quitte et on revient au menu principal
+			boucleControlemplayer=false
+			;;
 
 		*)	# Soit la saisie est erronée, soit le read est parti en timeout : on n'a rien écrit
 			;;
@@ -307,7 +321,6 @@ function startmenu {
 	echo "| 2 -> Parcourir dossiers  |"
 	echo "| 3 -> Entrer ID           |"
 	echo "| 4 -> Quitter             |"
-	#echo "| 5 -> Controle Player     |" # UTILITE ? si on a pas lancé le jukebox, mplayer n'est pas lancé...
 	echo "|__________________________|"
 	read choice
 	
@@ -335,10 +348,6 @@ function startmenu {
 		rm /tmp/playlist /tmp/scnlog /tmp/lolog /tmp/mplayer.pipe 2>/dev/null
 		exit 0
 	        ;;
-	
-	#5) 	# UTILITE ? mplayer n'est pas lancé ? on est pas passé par le jukebox
-	#	controlemplayer
-	#	;;
 	
 	*)      # mauvaise saisie
 		echo "Saisie erronée, veuillez recommencer"

@@ -292,7 +292,7 @@ function infosmenus {
 	read -n 1 chapichapo
 	
 	case $chapichapo in 
-	i)	# infos sur le dossier
+	i|I)	# infos sur le dossier
 		echo -n $UI_fileInput
         	read id
         	if [ $(echo $id | grep -v [a-Z] | wc -l) -eq 0 ]; then
@@ -301,7 +301,7 @@ function infosmenus {
         		getMusicDirectory
 		fi
 		;;
-	p)	# jouer l'album
+	p|P)	# jouer l'album
 		echo -n $UI_albumIDinput
 		read id
 		jukebox
@@ -431,7 +431,7 @@ function controlemplayer {
 			# on quitte et on revient au menu principal
 			boucleControlemplayer=false
 			;;
-		q|Q	
+		q|Q)	
 			# on quitte et on revient au menu principal
 			boucleControlemplayer=false
 			;;
@@ -470,6 +470,7 @@ function startmenu {
 		
 	4)	# on relance le controlemplayer
 		controlemplayer
+		;;
 	
 	5)	# QUITTER
 	        echo $UI_quit

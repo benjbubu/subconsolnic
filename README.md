@@ -3,11 +3,9 @@ subconsolnic
 
 A script to use subsonic in console
 
-Version : 2.1
+Version : 2.3
 
-The scn.sh is in French
-If you want it in english, download scn_en.sh
-
+To choose the langage of the script change the lang variable at the beginning.
 
 --------------------------------------------------------
 

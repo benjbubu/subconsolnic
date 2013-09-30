@@ -238,26 +238,26 @@ function recherche {
     boucleRecherche=true
     while $boucleRecherche
     do
-	echo $UI_searchtitle
-        echo -n $UI_searchInput
+	echo -e $UI_searchtitle
+        echo -n -e $UI_searchInput
 	read search
-	echo $UI_searching $search
+	echo -e $UI_searching $search
         #Envoi de la requete via l'api
         wget -q "$server/rest/search2.view?u=$user&p=$password&v=$version&c=$client&songCount=0&query=$search&songCount=0" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:album" -v "concat(@title, '     ', @album, '      ', @artist, '    ', @id)" -n | cat -n | sed -e '$d'
 
-	echo $UI_searchMenu
+	echo -e $UI_searchMenu
 	read -n 1 choice2
 
 	case $choice2 in
 		v|V)   # voir le contenu de l'album
-			echo -n $UI_albumIDinput
+			echo -n -e $UI_albumIDinput
 			read id
 			getMusicDirectory			
 			# on reste dans la boucle recherche
 			;;	
 
 		p|P)    # jouer l'album
-			echo -n $UI_albumIDinput
+			echo -n -e $UI_albumIDinput
 			read id
 			jukebox
 			# une fois la lecture/jukebox finie, on revient au menuPrincipal
@@ -269,7 +269,7 @@ function recherche {
 			;;
 
 		*) 	# saisie erronée
-			echo $UI_wrongKey
+			echo -e $UI_wrongKey
 			# on reste dans la boucle recherche
 			;;
 	esac
@@ -288,7 +288,7 @@ function infosmenus {
     boucleInfosmenus=true
     while $boucleInfosmenus
     do
-	echo $UI_infosmenu
+	echo -e $UI_infosmenu
 	read -n 1 chapichapo
 	
 	case $chapichapo in 
@@ -296,13 +296,13 @@ function infosmenus {
 		echo -n $UI_fileInput
         	read id
         	if [ $(echo $id | grep -v [a-Z] | wc -l) -eq 0 ]; then
-        		echo $UI_wrongKey
+        		echo -e $UI_wrongKey
         	else
         		getMusicDirectory
 		fi
 		;;
 	p|P)	# jouer l'album
-		echo -n $UI_albumIDinput
+		echo -n -e $UI_albumIDinput
 		read id
 		jukebox
 		# une fois la lecture/jukebox finie, retour au menuPrincipal
@@ -312,7 +312,7 @@ function infosmenus {
 		boucleInfosmenus=false
 		;;
 			
-	*)	echo $UI_wrongKey
+	*)	echo -e $UI_wrongKey
 		;;
 	esac
     done
@@ -324,7 +324,7 @@ function jukebox {
 	#Creation du fichier de controle mplayer en slave
 	#si il n'existe pas
 
-	echo $UI_jukeboxLoading
+	echo -e $UI_jukeboxLoading
 	fifo=`ls /tmp/ | grep mplayer.pipe`
 	if [ -z $fifo ]; then
 	mkfifo /tmp/mplayer.pipe
@@ -354,11 +354,11 @@ function jukebox {
 		echo "http://$server/rest/download.view?u=$user&p=$password&v=$version&c=$client&id=$line" >> /tmp/playlist
 	done
 	
-	echo $UI_songLoading
+	echo -e $UI_songLoading
 		
 	nohup mplayer -slave -input file=/tmp/mplayer.pipe -nocache -prefer-ipv4 -playlist /tmp/playlist > /tmp/scnlog 2>/dev/null &
 	
-	echo $UI_3dot
+	echo -e $UI_3dot
 	#sleep permettant d'attendre le lancement de mplayer avant 
 	#le début des tests de présence du processus
 	sleep 5
@@ -377,55 +377,55 @@ function controlemplayer {
 	wget -q "$server/rest/getSong.view?u=$user&p=$password&v=$version&c=$client&id=$recuperationid" -O - | xmlstarlet sel -N n=http://subsonic.org/restapi -t -m "//n:song" -v "concat('Titre : ', @title)" -n -o " " -n -v "concat('Artiste : ', @artist)" -n -o " " -n -v "concat('Album : ',@album)" > /tmp/lolog
 	
 	clear
-	echo $UI_nowListening
+	echo -e $UI_nowListening
 	echo ""
 	cat /tmp/lolog
 	echo ""
 	echo ""
-        echo $UI_controlemplayermenu
+        echo -e $UI_controlemplayermenu
         read -t 1 -n 1 controle
         
 	case $controle in 
 		p|P)	# PAUSE
 			echo "pause" > /tmp/mplayer.pipe
-			echo $UI_pause
+			echo -e $UI_pause
 			read -p "==============="
 		 	
-			echo $UI_unpause
+			echo -e $UI_unpause
 			echo "pause" > /tmp/mplayer.pipe
 			sleep 1
 			;;
 			
 		n|N)	# chanson suivante
 			echo "pt_step 1" > /tmp/mplayer.pipe
-			echo $UI_nextSong
+			echo -e $UI_nextSong
 			sleep 5
 			;;
 
 		b|B)	# chanson précédente
 			echo "pt_step -1" > /tmp/mplayer.pipe
-			echo $UI_prevSong
+			echo -e $UI_prevSong
 			sleep 5
 			;;
 		
 		e|E)	# avance rapide
-			echo $UI_fastForward
+			echo -e $UI_fastForward
 			echo "seek +20" > /tmp/mplayer.pipe
 			;;
 			
 		r|R)	# retour rapide
-			echo $UI_fastBackward
+			echo -e $UI_fastBackward
 			echo "seek -20" > /tmp/mplayer.pipe
 			;;
 			
 		s|S)	# stop et retour menuprincipal
-			echo $UI_stopPlayer
+			echo -e $UI_stopPlayer
 			echo "stop" > /tmp/mplayer.pipe
-			echo $UI_purgingPlayerPipe
+			echo -e $UI_purgingPlayerPipe
 			rm /tmp/mplayer.pipe
-			echo $UI_purginPlaylist
+			echo -e $UI_purginPlaylist
 			rm /tmp/playlist
-			echo $UI_purgingLogs
+			echo -e $UI_purgingLogs
 			rm /tmp/scnlog
 			rm /tmp/lolog
 			# on quitte et on revient au menu principal
@@ -447,7 +447,7 @@ function controlemplayer {
 
 function startmenu {
 #Start menu
-	echo $UI_startMenu
+	echo -e $UI_startMenu
 	read -n 1 choice
 	
 	
@@ -463,7 +463,7 @@ function startmenu {
 		;; 
 	
 	3)	# jouer un ID connu
-		echo -n $UI_albumIDinput
+		echo -n -e $UI_albumIDinput
 		read id
 		jukebox
 		;;
@@ -473,14 +473,14 @@ function startmenu {
 		;;
 	
 	5)	# QUITTER
-	        echo $UI_quit
+	        echo -e $UI_quit
 		echo "stop" > /tmp/mplayer.pipe
 		rm /tmp/playlist /tmp/scnlog /tmp/lolog /tmp/mplayer.pipe 2>/dev/null
 		exit 0
 	        ;;
 	
 	*)      # mauvaise saisie
-		echo $UI_wrongKey
+		echo -e $UI_wrongKey
 	        ;;
 esac
 }

@@ -6,7 +6,7 @@
 #                                            #
 # Forked from SubsonicPlayerCLI by ts123     #
 #                                            #
-# Version : 2.2                              #
+# Version : 2.3                              #
 #                                            #
 # Author : Benjbubu                          #
 # Contributor : LiZ                          #
@@ -144,6 +144,86 @@ UI_wrongKey="Saisie erronée, veuillez recommencer"
 
 ;;
 en|EN)
+UI_startMenu="\
+Welcome to Subconsolnic !\n\
+Let's play !\n\
+----------------------------\n\
+| S-U-B-C-O-N-S-O-L-N-I-C  |\n\
+|__________________________|\n\
+|                          |\n\
+|   Available keys         |\n\
+| 1 -> Search Albums       |\n\
+| 2 -> Explore Folders     |\n\
+| 3 -> Enter ID            |\n\
+| 4 -> Mplayer Controls    |\n\
+| 5 -> Quit                |\n\
+|__________________________|"
+
+UI_searchMenu="\
+################################\n\
+#  Available choices :         #\n\
+# v -> Details about album     #\n\
+# p -> Play the album	       #\n\
+# q -> Main menu               #\n\
+################################"
+
+UI_infosmenu="\
+############################\n\
+#     Available choices    #\n\
+#	                   #\n\
+# i -> Infos about folder  #\n\
+# p -> Play the album      #\n\
+# q -> Main menu           #\n\
+############################"
+
+UI_controlemplayermenu="\
+#########################\n\
+#    MPLAYER CONTROL    #\n\
+# P : Pause             #\n\
+# N : Next Song         #\n\
+# B : Previous Song     #\n\
+#                       #\n\
+# E : Seeking Forward   #\n\
+# R : Seeking Backward  #\n\
+#                       #\n\
+# S : Stop player       #\n\
+# Q : Main menu         #\n\
+#########################"
+
+# controlemplayer function
+UI_nowListening="Currently Listening :"
+UI_pause="\
+=====PAUSE=====\n\
+Resume ? [O]"
+UI_unpause="=====Reprise===="
+UI_nextSong="Next Song..."
+UI_prevSong="Previous Song..."
+UI_fastForward="Seeking forward"
+UI_fastBackward="Seeking backward"
+UI_stopPlayer="Stopping Player"
+UI_purgingPlayerPipe="Removing mplayer.pipe"
+UI_purginPlaylist="Removing playlist"
+UI_purgingLogs="Removing logs"
+
+# Jukebox function
+UI_jukeboxLoading="Loading player..."
+UI_songLoading="CLoading Song"
+UI_3dot="..."
+
+# serach function
+UI_searchtitle="Search albums by artist/song/albums"
+UI_searchInput="Enter your keywords"
+UI_searching="I'm looking for :"
+
+# infosmenu function
+UI_fileInput="Enter the ID (number in the last column) for more details"
+
+# startmenu function
+UI_quit="Good luck without sound !"
+
+# global 
+UI_albumIDinput="Enter the ID (number in the last column)"
+UI_wrongKey="Wrong key !"
 
 ;;
 *)
